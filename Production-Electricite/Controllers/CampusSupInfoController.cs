@@ -35,47 +35,27 @@ namespace Production_Electricite.Controllers
             _database = _client.GetDatabase("local");
         }
 
-        bool CampusExists(CampusSupInfo campus)
+        HttpResponseMessage insert(CampusSupInfo campus)
         {
-
-            var test = _collection.AsQueryable().FirstOrDefault(
+            HttpResponseMessage response = new HttpResponseMessage();
+            if (_collection.AsQueryable().FirstOrDefault(
                 c => (
                     c.Nom == campus.Nom
                     && c.Adresse == campus.Adresse
                     && c.CodePostal == campus.CodePostal
                     && c.Ville == campus.Ville
                 )
-            );
-
-            return test != null;
-        }
-
-        HttpResponseMessage conformiteCampus(CampusSupInfo campus)
-        {
-            HttpResponseMessage response = new HttpResponseMessage();
-
-            string content="";
-
-            if (campus != null)
+            ) != null)
             {
-                if (campus.Nom == null) { content += "Le nom (Nom) du campus doit être renseigné\n"; }
-                if (campus.Adresse == null) { content += "L'adresse (Adresse) du campus doit être renseignée\n"; }
-                if (campus.CodePostal == null) { content += "Le code postal (CodePostal) du campus doit être renseigné\n"; }
-                if (campus.Ville == null) { content += "La ville (Ville) du campus doit être renseignée\n"; }
-
-                if (CampusExists(campus))
-                {
-                    content = "le campus " + campus.Nom + " existe déjà dans la base de données.";
-                }
+                response.Content = new StringContent("Le campus " + campus.Nom + " existe déjà dans la base de données.");
+                response.StatusCode = HttpStatusCode.OK;
             }
             else
             {
-                content = "Le flux envoyé ne correspond pas à un campus";
-            }
-            if (content != "")
-            {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                response.Content = new StringContent(content);
+                response.Content = new StringContent("Le campus " + campus.Nom + " a été inséré.");
+                response.StatusCode = HttpStatusCode.Created;
+                campus._id = Guid.NewGuid().ToString();
+                _collection.InsertOne(campus);
             }
 
             return response;
@@ -93,19 +73,17 @@ namespace Production_Electricite.Controllers
             connectToMongo();
             _collection = getCollection("CampusSupInfo");
 
-            HttpResponseMessage response = conformiteCampus(campus);
+            HttpResponseMessage response = new HttpResponseMessage();
 
-            if (response.StatusCode != HttpStatusCode.BadRequest)
+            if (ModelState.IsValid)
             {
-                    campus._id = Guid.NewGuid().ToString();
-                    _collection.InsertOne(campus);
-                    response.StatusCode = HttpStatusCode.Created;
-                    response.Content = new StringContent("le campus " + campus.Nom + " a été inséré.");
+                return insert(campus);
             }
-
-            return response;
+            else
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
         }
-
 
         //[HttpGet]
         //[Route("api/v1/campussupinfo")]
