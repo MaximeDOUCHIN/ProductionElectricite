@@ -1,39 +1,17 @@
 ﻿using MongoDB.Driver;
 using Production_Electricite.Models;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http;
-using System.Configuration;
-using System.Web;
+using Production_Electricite.Controllers.utils;
 
 namespace Production_Electricite.Controllers
 {
     public class CampusSupInfoController : ApiController
     {
-
-        protected static IMongoClient _client;
-        protected static IMongoDatabase _database;
-        IMongoCollection<CampusSupInfo> _collection;
-
-        /// <summary>
-        /// récupère une collection MongoDB
-        /// </summary>
-        /// <param name="collection"></param>
-        /// <returns></returns>
-        IMongoCollection<CampusSupInfo> getCollection(string collection)
-        {
-            return _database.GetCollection<CampusSupInfo>(collection);
-        }
-
-        void connectToMongo()
-        {
-            _client = new MongoClient("mongodb://localhost:27017");
-            _database = _client.GetDatabase("local");
-        }
+        protected IMongoCollection<CampusSupInfo> _collection;
 
         HttpResponseMessage insert(CampusSupInfo campus)
         {
@@ -70,8 +48,7 @@ namespace Production_Electricite.Controllers
         [Route("insert")]
         public HttpResponseMessage Insert(CampusSupInfo campus)
         {
-            connectToMongo();
-            _collection = getCollection("CampusSupInfo");
+            _collection = new Connexion().getCollection<CampusSupInfo>("CampusSupInfo");
 
             HttpResponseMessage response = new HttpResponseMessage();
 
