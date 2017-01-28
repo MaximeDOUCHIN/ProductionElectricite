@@ -223,10 +223,11 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\CampusSupInfoController.cs" />
+    <Compile Include="Controllers\centrale\CentraleController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
-    <Compile Include="Controllers\User.cs" />
-    <Compile Include="Controllers\UserController.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Controllers\user\UserController.cs" />
     <Compile Include="Controllers\utils\Connexion.cs" />
     <Compile Include="Controllers\utils\Login.cs" />
     <Compile Include="Global.asax.cs">
@@ -234,6 +235,7 @@
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\CampusSupInfo.cs" />
+    <Compile Include="Models\Centrale.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
