@@ -10,7 +10,7 @@ namespace Production_Electricite.Controllers.utils
     {
         public User getUserFromRequest(User user)
         {
-            IMongoCollection<User> _collection = new Connexion().getCollection<User>("User");
+            IMongoCollection<User> _collection = new MongoDB().getCollection<User>("User");
             return _collection.AsQueryable().FirstOrDefault(u => u.login == user.login);
         }
 
@@ -41,7 +41,7 @@ namespace Production_Electricite.Controllers.utils
 
         public bool userExists(User user)
         {
-            return new Connexion().
+            return new MongoDB().
                 getCollection<User>("User").
                 AsQueryable().
                 FirstOrDefault(u => u.login == user.login) != null;

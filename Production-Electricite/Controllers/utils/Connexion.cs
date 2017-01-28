@@ -2,7 +2,7 @@
     
 namespace Production_Electricite.Controllers.utils
 {
-    public class Connexion
+    public class MongoDB
     {
         public static IMongoClient _client;
         public static IMongoDatabase _database;

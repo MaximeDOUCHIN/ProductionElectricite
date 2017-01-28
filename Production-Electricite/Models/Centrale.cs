@@ -18,11 +18,12 @@ namespace Production_Electricite.Models
         public int version { get; set; }
         public string userId { get; set; }
         [Required]
-        public string nom { get; set; }
+        public string reference { get; set; }
         [Required]
         [EnumDataType(typeof(TypeCentrale))]
         public object type { get; set; }
         [Required]
+        [Range(0.001, Double.MaxValue)]
         public double capacite { get; set; }
         public double stock { get; set; }
         public DateTime lastModified { get; set; }

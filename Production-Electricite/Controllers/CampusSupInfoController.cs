@@ -48,7 +48,7 @@ namespace Production_Electricite.Controllers
         [Route("insert")]
         public HttpResponseMessage Insert(CampusSupInfo campus)
         {
-            _collection = new Connexion().getCollection<CampusSupInfo>("CampusSupInfo");
+            _collection = new utils.MongoDB().getCollection<CampusSupInfo>("CampusSupInfo");
 
             HttpResponseMessage response = new HttpResponseMessage();
 
