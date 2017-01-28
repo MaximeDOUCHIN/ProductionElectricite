@@ -16,7 +16,16 @@ namespace Production_Electricite.Models
         [Required]
         public string reference { get; set; }
         [Required]
+        [Range(0.001, Double.MaxValue)]
         public double quantite { get; set; }
     }
 
+    public class Consume
+    {
+        [Required]
+        public string reference { get; set; }
+        [Required]
+        [Range(0.001, Double.MaxValue)]
+        public double quantite { get; set; }
+    }
 }

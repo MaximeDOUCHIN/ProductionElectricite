@@ -95,7 +95,7 @@ namespace Production_Electricite.Controllers
                         createCookie("login", userRequest.login)
                     });
 
-                response.Content = new StringContent(userRequest.login + " connecté avec succes.");
+                response.Content = new StringContent(userRequest.login + " connecté avec succès.");
                 response.StatusCode = HttpStatusCode.OK;
                 return response;
             }

@@ -2,6 +2,7 @@
 using Production_Electricite.Controllers.utils;
 using Production_Electricite.Models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -51,7 +52,7 @@ namespace Production_Electricite.Controllers.centrale
                 if (centraleDB == null) return Request.CreateErrorResponse(HttpStatusCode.NotFound, new Exception("La centrale " + centrale + " n'a pas été trouvée."));
 
                 Stock stockDB = _stock.AsQueryable().OrderByDescending(s => s.dateCreation).First(s => s.idCentrale == centraleDB._id);
-                if (stockDB == null) return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, new Exception("La base de données est corrompue. Le stock de la centrale " + centrale +" est introuvable."));
+                if (stockDB == null) return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, new Exception("La base de données est corrompue. Le stock de la centrale " + centrale + " est introuvable."));
 
                 response.StatusCode = HttpStatusCode.OK;
                 response.Content = new StringContent(stock(centraleDB, stockDB));
@@ -59,6 +60,59 @@ namespace Production_Electricite.Controllers.centrale
             }
             else return Request.CreateErrorResponse(HttpStatusCode.Forbidden, new Exception("Session expirée, merci de vous reconnecter"));
         }
+
+        [HttpGet]
+        [Route("centrale/{centrale}/historique")]
+        public HttpResponseMessage ConsulterHistorique(string centrale)
+        {
+            if (!isSessionExpired())
+            {
+                _centrale = new utils.MongoDB().getCollection<Centrale>("Centrale");
+                _stock = new utils.MongoDB().getCollection<Stock>("Stock");
+
+                HttpResponseMessage response = new HttpResponseMessage();
+                User user = getUserFromCookies();
+
+                Centrale centraleDB = _centrale.AsQueryable().
+                  FirstOrDefault(c => c.userId == user._id && c.reference == centrale);
+                if (centraleDB == null) return Request.CreateErrorResponse(HttpStatusCode.NotFound, new Exception("La centrale " + centrale + " n'a pas été trouvée."));
+
+                List<Stock> stocksDB = _stock.AsQueryable().OrderByDescending(s => s.dateCreation).Where(s => s.idCentrale == centraleDB._id).ToList();
+                if (stocksDB == null) return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, new Exception("La base de données est corrompue. L'historique du stock de la centrale " + centrale + " est introuvable."));
+
+                string historique = "Historique du stock de la centrale "+ centrale + " :\n";
+
+                foreach(Stock stock in stocksDB)
+                {
+                    historique += stock.dateCreation + " - " + stock.quantite + " KW\n";
+                }
+                response.StatusCode = HttpStatusCode.OK;
+                response.Content = new StringContent(historique);
+
+                return response;
+            }
+            else return Request.CreateErrorResponse(HttpStatusCode.Forbidden, new Exception("Session expirée, merci de vous reconnecter"));
+        }
+
+        [HttpPut]
+        [Route("centrale/consommer")]
+        public HttpResponseMessage ConsommerStock(Consume consumption)
+        {
+
+            if (!isSessionExpired())
+            {
+                if (ModelState.IsValid)
+                {
+                    _centrale = new utils.MongoDB().getCollection<Centrale>("Centrale");
+                    _stock = new utils.MongoDB().getCollection<Stock>("Stock");
+
+                    return consume(consumption);
+                }
+                else return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
+            else return Request.CreateErrorResponse(HttpStatusCode.Forbidden, new Exception("Session expirée, merci de vous reconnecter"));
+        }
+
 
         [HttpPut]
         [Route("centrale/recharger")]
@@ -130,17 +184,17 @@ namespace Production_Electricite.Controllers.centrale
             Stock stockDB = _stock.AsQueryable().OrderByDescending(s => s.dateCreation).First(s => s.idCentrale == centraleDB._id);
             if (stockDB == null) return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, new Exception("La base de données est corrompue. Le stock de la centrale " + centraleDB.reference + " est introuvable."));
 
-            double quantite = stockDB.quantite;
+            double quantiteDB = stockDB.quantite;
             double capaciteDB = centraleDB.capacite;
-            double rechargeAcceptable = capaciteDB - quantite;
+            double rechargeAcceptable = capaciteDB - quantiteDB;
 
-            if ((quantite + refill.quantite) > rechargeAcceptable) return Request.CreateErrorResponse(HttpStatusCode.NotAcceptable, new Exception("La centrale n'accepte qu'une recharge de " + rechargeAcceptable + "KW au maximum."));
+            if ((quantiteDB + refill.quantite) > rechargeAcceptable) return Request.CreateErrorResponse(HttpStatusCode.NotAcceptable, new Exception("La centrale n'accepte qu'une recharge de " + rechargeAcceptable + "KW au maximum."));
 
             Stock newStock = new Stock()
             {
                 _id = Guid.NewGuid().ToString(),
                 idCentrale = centraleDB._id,
-                quantite = quantite + refill.quantite,
+                quantite = quantiteDB + refill.quantite,
                 dateCreation = DateTime.Now
             };
 
@@ -151,6 +205,42 @@ namespace Production_Electricite.Controllers.centrale
 
             response.StatusCode = HttpStatusCode.OK;
             response.Content = new StringContent("La centrale " + centraleDB.reference + " a été rechargée de " + refill.quantite + " KW.\n" + stock(centraleDB, stockDB));
+            return response;
+        }
+
+        private HttpResponseMessage consume(Consume consumption)
+        {
+            HttpResponseMessage response = new HttpResponseMessage();
+            User user = getUserFromCookies();
+
+            Centrale centraleDB = _centrale.AsQueryable().
+            FirstOrDefault(c => c.userId == user._id && c.reference == consumption.reference);
+            if (centraleDB == null) return Request.CreateErrorResponse(HttpStatusCode.NotFound, new Exception("La centrale " + consumption.reference + " n'a pas été trouvée."));
+
+            Stock stockDB = _stock.AsQueryable().OrderByDescending(s => s.dateCreation).First(s => s.idCentrale == centraleDB._id);
+            if (stockDB == null) return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, new Exception("La base de données est corrompue. Le stock de la centrale " + centraleDB.reference + " est introuvable."));
+
+            double quantiteDB = stockDB.quantite;
+            double capaciteDB = centraleDB.capacite;
+            double rechargeAcceptable = capaciteDB - quantiteDB;
+
+            if (consumption.quantite > quantiteDB) return Request.CreateErrorResponse(HttpStatusCode.NotAcceptable, new Exception("La centrale n'a qu'un stock de " + quantiteDB + "KW."));
+
+            Stock newStock = new Stock()
+            {
+                _id = Guid.NewGuid().ToString(),
+                idCentrale = centraleDB._id,
+                quantite = quantiteDB - consumption.quantite,
+                dateCreation = DateTime.Now
+            };
+
+            _stock.InsertOne(newStock);
+
+            //refresh de la base pour actualiser le response.content
+            stockDB = refreshStock(centraleDB);
+
+            response.StatusCode = HttpStatusCode.OK;
+            response.Content = new StringContent("La centrale " + centraleDB.reference + " a été vidée de " + consumption.quantite + " KW.\n" + stock(centraleDB, stockDB));
             return response;
         }
 
