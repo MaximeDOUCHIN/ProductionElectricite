@@ -15,7 +15,6 @@ namespace Production_Electricite.Models
         };
 
         public string _id { get; set; }
-        public int version { get; set; }
         public string userId { get; set; }
         [Required]
         public string reference { get; set; }
@@ -25,7 +24,6 @@ namespace Production_Electricite.Models
         [Required]
         [Range(0.001, Double.MaxValue)]
         public double capacite { get; set; }
-        public double stock { get; set; }
-        public DateTime lastModified { get; set; }
+        public DateTime dateCreation { get; set; }
     }
 }

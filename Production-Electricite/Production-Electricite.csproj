@@ -226,6 +226,7 @@
     <Compile Include="Controllers\centrale\CentraleController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Models\Stock.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Controllers\user\UserController.cs" />
     <Compile Include="Controllers\utils\Connexion.cs" />
