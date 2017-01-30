@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web.Http;
+﻿using System.Web.Http;
 
 namespace Production_Electricite
 {
@@ -9,8 +6,6 @@ namespace Production_Electricite
     {
         public static void Register(HttpConfiguration config)
         {
-            // Configuration et services API Web
-
             // Itinéraires de l'API Web
             config.MapHttpAttributeRoutes();
 

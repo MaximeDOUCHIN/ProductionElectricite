@@ -188,7 +188,7 @@ namespace Production_Electricite.Controllers.centrale
             double capaciteDB = centraleDB.capacite;
             double rechargeAcceptable = capaciteDB - quantiteDB;
 
-            if ((quantiteDB + refill.quantite) > rechargeAcceptable) return Request.CreateErrorResponse(HttpStatusCode.NotAcceptable, new Exception("La centrale n'accepte qu'une recharge de " + rechargeAcceptable + "KW au maximum."));
+            if ((quantiteDB + refill.quantite) > capaciteDB) return Request.CreateErrorResponse(HttpStatusCode.NotAcceptable, new Exception("La centrale n'accepte qu'une recharge de " + rechargeAcceptable + "KW au maximum."));
 
             Stock newStock = new Stock()
             {
