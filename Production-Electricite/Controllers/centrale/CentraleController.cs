@@ -17,7 +17,7 @@ namespace Production_Electricite.Controllers.centrale
         protected IMongoCollection<Stock> _stock;
 
         [HttpPut]
-        [Route("centrale/create")]
+        [Route("centrale/creer")]
         public HttpResponseMessage CreateCentrale(Centrale centraleRequest)
         {
             LoginInfos loginInfos = new LoginInfos();
@@ -96,7 +96,7 @@ namespace Production_Electricite.Controllers.centrale
 
         [HttpPut]
         [Route("centrale/consommer")]
-        public HttpResponseMessage ConsommerStock(Consume consumption)
+        public HttpResponseMessage ConsommerStock(Usage consumption)
         {
 
             if (!isSessionExpired())
@@ -116,7 +116,7 @@ namespace Production_Electricite.Controllers.centrale
 
         [HttpPut]
         [Route("centrale/recharger")]
-        public HttpResponseMessage RechargerStock(Refill refill)
+        public HttpResponseMessage RechargerStock(Usage refill)
         {
             if (!isSessionExpired())
             {
@@ -172,7 +172,7 @@ namespace Production_Electricite.Controllers.centrale
                 new HttpException("La centrale " + centraleRequest.reference + " existe déjà pour le user " + user.login + "."));
         }
 
-        private HttpResponseMessage refill(Refill refill)
+        private HttpResponseMessage refill(Usage refill)
         {
             HttpResponseMessage response = new HttpResponseMessage();
             User user = getUserFromCookies();
@@ -208,7 +208,7 @@ namespace Production_Electricite.Controllers.centrale
             return response;
         }
 
-        private HttpResponseMessage consume(Consume consumption)
+        private HttpResponseMessage consume(Usage consumption)
         {
             HttpResponseMessage response = new HttpResponseMessage();
             User user = getUserFromCookies();

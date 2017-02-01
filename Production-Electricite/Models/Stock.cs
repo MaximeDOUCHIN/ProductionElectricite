@@ -11,16 +11,7 @@ namespace Production_Electricite.Models
         public DateTime dateCreation { get; set; }
     }
 
-    public class Refill
-    {
-        [Required]
-        public string reference { get; set; }
-        [Required]
-        [Range(0.001, Double.MaxValue)]
-        public double quantite { get; set; }
-    }
-
-    public class Consume
+    public class Usage
     {
         [Required]
         public string reference { get; set; }
