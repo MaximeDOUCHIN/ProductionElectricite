@@ -14,7 +14,7 @@ La base de données mongo utilisée est Local. Elle est accessible via mongodb:/
 <h3>2. Démarrer un serveur IIS</h3>
 <b>Version de IIS Express :</b> 10.0.14358.1000
 
-Démarrer le serveur IIS via la commande 
+Démarrer le serveur IIS via la commande (fichier run.bat)
 <div><code>  iiexpress.exe /path:d:\Workspaces\Production-Electricite\Production-Electricite /port:53060</code></div>
 <i><H2>Toutes les commandes doivent étre soumises sur l'url http://localhost:53060/</h2></i>
 
